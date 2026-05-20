@@ -7,7 +7,7 @@ Raycast-first architecture as the product runtime core
 Accepted
 
 ## Context
-El estado actual del proyecto posiciona `RaycastScene` como experiencia principal jugable en navegador, con módulos especializados en `src/game/raycast/` y escenas de soporte (`MenuScene`, `PrologueScene`, `RaycastWorldLockedScene`). `ArenaScene` se conserva como sandbox 2D y cobertura de regresión, no como flujo principal.
+El estado actual del proyecto posiciona `RaycastScene` como experiencia principal jugable en navegador, con módulos especializados en `src/game/raycast/` y escenas de soporte (`MenuScene`, `SettingsScene`, `PrologueScene`, `RaycastWorldLockedScene`). `ArenaScene` permanece en el árbol solo como código legado para tests — **no** está registrada en `gameConfig.scene` ni es accesible desde el menú actual.
 
 Referencias canónicas:
 - [../architecture.md](../architecture.md)
@@ -28,7 +28,7 @@ Se necesita formalizar por qué el proyecto usa una arquitectura raycast propia 
 Mantener una arquitectura **raycast-first** con estas reglas:
 - `RaycastScene` es el runtime principal del producto.
 - Lógica reusable/pura se extrae a módulos de `src/game/raycast/` y `src/game/systems/` cuando reduzca acoplamiento sin romper flujo.
-- `ArenaScene` permanece como modo secundario y superficie de regresión; no dirige decisiones de producto.
+- `ArenaScene` no forma parte del flujo jugable actual; el código legado no dirige decisiones de producto.
 - Cualquier cambio estructural profundo se ejecuta en pasos pequeños con pruebas de regresión.
 
 ## Tradeoffs
@@ -51,7 +51,7 @@ Mantener una arquitectura **raycast-first** con estas reglas:
 ## Future evolution
 - Extraer submódulos de `RaycastScene` por responsabilidad (sin big-bang rewrite).
 - Introducir budgets explícitos de frame-time por subsistema en docs de performance.
-- Mantener `ArenaScene` como compatibilidad de pruebas hasta decidir su retiro o aislamiento completo.
+- Retirar o re-aislar `ArenaScene` cuando los tests históricos ya no la requieran.
 
 ## Cross-links
 - [0003-encounter-director.md](./0003-encounter-director.md)

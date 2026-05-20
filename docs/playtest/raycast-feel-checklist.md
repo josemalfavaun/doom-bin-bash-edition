@@ -71,9 +71,7 @@ Usar este checklist antes de compartir un build o demo del vertical slice. El ob
 - Retry y vuelta al menú siguen funcionando.
 - Debug HUD toggle no rompe input normal.
 
-## Arena Sanity Check
+## Arena (legacy — no en menú actual)
 
-- `ArenaScene` sigue abriendo desde menú.
-- Armas, daño y enemigos 2D mantienen el comportamiento previo esperado.
-- Triggers y doors de Arena siguen funcionando con la compatibilidad nueva.
-- No hay cambios visuales o de balance inesperados en el sandbox 2D.
+- `ArenaScene` **no** está registrada en `gameConfig.scene` — no abrir desde menú en playtests de entrega.
+- Si se reintroduce el modo 2D, repetir smoke PvP/PvE y triggers de `arenaLayout` antes de documentarlo de nuevo.

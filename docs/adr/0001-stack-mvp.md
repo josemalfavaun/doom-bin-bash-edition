@@ -1,7 +1,9 @@
 # ADR 0001: Stack técnico para MVP
 
+> **Histórico (MVP inicial).** El runtime actual es raycast-first en navegador, sin Express/SQLite. Para el stack vigente ver [adrs/0002-raycast-architecture.md](../adrs/0002-raycast-architecture.md) y [architecture.md](../architecture.md).
+
 ## Estado
-Accepted
+Accepted (superseded in part — backend opcional no implementado)
 
 ## Contexto
 Se requiere demo funcional en < 1 mes con equipo junior de 3 personas.

@@ -2,81 +2,107 @@
 
 ## Purpose
 
-Provide a reproducible validation trail to support the statement:
+Reproducible validation that the project **runs in Docker** for local development and demos.
 
-"The project runs directly in Docker."
+**Scope (important):** Docker here runs the **Vite dev server** (`npm run docker:dev`) inside `node:20-alpine`. It does **not** ship a production backend, database, or nginx production image. The playable product remains a **static browser client** built to `dist/` for GitHub Pages.
 
-Scope is runtime/container validation only. No gameplay feature claims are added here.
+## Validation date
 
-## Environment Assumptions
+- **2026-05-20** (local run on `main` @ `0b466c3`, branch `docs/docker-validation-cleanup`)
+- **Host:** macOS, Docker Desktop (daemon required before `docker compose`)
 
-- Docker Desktop is installed and running.
-- Commands are executed from repo root.
-- Host can access `127.0.0.1`.
+## Environment assumptions
 
-## Validation Procedure (Exact Commands)
+- Docker Desktop installed and **running** (`docker info` succeeds).
+- Commands executed from repository root.
+- Host can reach `http://127.0.0.1:5173`.
+- Port `5173` free on the host.
+
+## Commands executed
 
 ```bash
-docker compose up --build -d
+# Quality gate (same as CI, pre-Docker)
+npm ci
+npm test
+npm run lint
+npm run build
+
+# Docker image + service
+docker compose build
+docker compose up -d
+
+# Automated smoke (build, up, curl, down via trap)
+npm run docker:smoke
+
+# Manual evidence capture
+docker compose up -d
+docker compose logs --tail=80
 curl -I http://127.0.0.1:5173
 docker compose down
 ```
 
-Optional one-command smoke helper:
+## Expected vs obtained
 
-```bash
-npm run docker:smoke
+| Step | Expected | Obtained |
+|------|----------|----------|
+| `docker compose build` | Image `doom-bin-bash-edition-game` builds without error | **PASS** — build completed (~36s first build) |
+| `docker compose up -d` | Container `doom-bin-bash-game` running, port `5173:5173` | **PASS** — service `Up`, healthcheck starting |
+| Vite inside container | `VITE v5.4.x ready`, listening `0.0.0.0:5173` | **PASS** — see logs excerpt below |
+| `curl -I http://127.0.0.1:5173` | `HTTP/1.1 200 OK` | **PASS** |
+| `npm run docker:smoke` | Script exits `0`, prints `OK: HTTP 200 received` | **PASS** — reachable on attempt 2 |
+| `docker compose down` | Container and network removed | **PASS** |
+
+### Log excerpt (Vite ready)
+
+```text
+doom-bin-bash-game  | > doom-bin-bash-edition@0.1.0 docker:dev
+doom-bin-bash-game  | > vite --host 0.0.0.0 --port 5173
+doom-bin-bash-game  |   VITE v5.4.21  ready in 174 ms
+doom-bin-bash-game  |   ➜  Local:   http://localhost:5173/
+doom-bin-bash-game  |   ➜  Network: http://172.23.0.2:5173/
 ```
 
-## Expected Output (Summarized)
-
-### `docker compose up --build -d`
-
-- Image build completes without error.
-- Service `game` starts.
-- Container `doom-bin-bash-game` is created/running.
-
-### `curl -I http://127.0.0.1:5173`
-
-Expected status header includes:
+### `curl -I` excerpt
 
 ```text
 HTTP/1.1 200 OK
+Content-Type: text/html
 ```
 
-Interpretation:
+## What this proves
 
-- Containerized Vite runtime is reachable from host.
-- Port forwarding `5173:5173` works.
+- Dependencies install with `npm ci` inside the image.
+- The game dev server is reachable from the host through Docker port mapping.
+- `scripts/docker-smoke.sh` is a one-command regression check for demos/CI-adjacent validation.
 
-### `docker compose down`
+## What this does **not** prove
 
-- Service stops.
-- Container/network are cleaned for next run.
+- Production cloud deploy (Kubernetes, Terraform, etc.).
+- A dedicated game backend or API.
+- OpenAPI / REST services (not applicable — static client only).
+- Production nginx serving `dist/` inside Docker (use `npm run build` + `npm run preview:dist` or GitHub Pages for static preview).
 
-## Validation Checklist
+## Troubleshooting
 
-- [ ] `docker compose up --build -d` succeeds.
-- [ ] `curl -I http://127.0.0.1:5173` returns `HTTP/1.1 200 OK`.
-- [ ] Browser opens [http://127.0.0.1:5173](http://127.0.0.1:5173).
-- [ ] `docker compose down` cleans runtime.
+| Symptom | Likely cause | Fix |
+|---------|----------------|-----|
+| `Cannot connect to the Docker daemon` | Docker Desktop stopped | Start Docker Desktop; wait until `docker info` works |
+| Port `5173` already in use | Local `npm run dev` or old container | `docker compose down`; stop other Vite on 5173 |
+| `wget` healthcheck fails on non-Alpine host | N/A — healthcheck runs **inside** container | Ensure image rebuilt after `Dockerfile` changes |
+| Slow first `docker compose build` | Cold `npm ci` layer | Normal; rebuilds use cache |
+| Smoke script stops container immediately | By design — `trap` runs `docker compose down` | Use `docker compose up` (foreground) for interactive play |
 
-## Evidence Capture for Professor
+## Related files
 
-Take screenshots of:
+- `Dockerfile` — `node:20-alpine`, `npm ci`, `CMD npm run docker:dev`
+- `docker-compose.yml` — service `game`, volume mount, healthcheck `wget` on `5173`
+- `package.json` — `docker:up`, `docker:smoke`, `docker:dev`
+- [docker.md](./docker.md) — quick start for professors/reviewers
 
-1. Terminal after `docker compose up --build -d` showing service/container running.
-2. Terminal showing `curl -I http://127.0.0.1:5173` with `HTTP/1.1 200 OK`.
-3. Browser with game loaded at `http://127.0.0.1:5173`.
-4. Terminal after `docker compose down` showing clean stop.
+## Validation checklist (for delivery packet)
 
-Recommended: keep timestamps visible in terminal for traceability.
-
-## What Not to Promise
-
-- Do not claim production cloud deployment.
-- Do not claim backend services exist.
-- Do not claim Kubernetes/Terraform orchestration.
-- Do not claim online multiplayer infra from this Docker setup.
-
-This validation proves local containerized runtime reproducibility for the browser game.
+- [x] `docker compose build` succeeds
+- [x] `docker compose up -d` + browser/curl returns **200**
+- [x] `npm run docker:smoke` exits **0**
+- [x] `docker compose down` cleans up
+- [ ] Screenshot: terminal + browser at `http://127.0.0.1:5173` (optional evidence for professor)

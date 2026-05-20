@@ -114,11 +114,15 @@ On version tags `v*.*.*` and `workflow_dispatch`:
 
 Purpose: keep release artifact generation tied to explicit version tags or manual runs, instead of making every mainline build look like a failed release.
 
+## OpenAPI
+
+**Does not apply.** The product is a static browser game client without a first-party HTTP API. There is no OpenAPI/Swagger spec to publish. Persistence uses browser `localStorage` via `SaveManager`.
+
 ## Services Not Used (By Design)
 
 Not used in current scope:
 
-- Dedicated backend API
+- Dedicated backend API (no Express/Node server in repo runtime)
 - Database (SQL/NoSQL)
 - Auth service
 - Matchmaking service
