@@ -6,6 +6,8 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY server ./server
+COPY shared ./shared
+COPY src/game ./src/game
 
 EXPOSE 3001
 
