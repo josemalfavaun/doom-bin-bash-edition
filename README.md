@@ -227,4 +227,5 @@ Open [http://127.0.0.1:5173](http://127.0.0.1:5173). Stop: `docker compose down`
 
 More details: [docs/runtime/docker.md](docs/runtime/docker.md), [docs/runtime/docker-validation.md](docs/runtime/docker-validation.md).
 
+Badge check: pull shark 1.
 Badge check: pair extraordinaire.
