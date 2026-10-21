@@ -226,3 +226,5 @@ docker compose up --build
 Open [http://127.0.0.1:5173](http://127.0.0.1:5173). Stop: `docker compose down`.
 
 More details: [docs/runtime/docker.md](docs/runtime/docker.md), [docs/runtime/docker-validation.md](docs/runtime/docker-validation.md).
+
+Badge check: pair extraordinaire.
